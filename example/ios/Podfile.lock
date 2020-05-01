@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - media_gallery (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - media_gallery (from `.symlinks/plugins/media_gallery/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  media_gallery:
+    :path: ".symlinks/plugins/media_gallery/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  media_gallery: 834a04455a476b975c280aa1f24ed2853dfe36de
+
+PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
+
+COCOAPODS: 1.7.5
