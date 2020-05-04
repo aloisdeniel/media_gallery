@@ -24,15 +24,14 @@ class _MediaCollectionsPageState extends State<MediaCollectionsPage> {
   }
 
   Future<void> initAsync() async {
-    if (await Permission.storage.request().isGranted) {
-      try {
-        this.collections = await MediaGallery.listMediaCollections(
-          mediaTypes: [MediaType.image, MediaType.video],
-        );
-        this.setState(() {});
-      } catch (e) {
-        print("Failed : $e");
-      }
+    final selection = MediaPickerSelection.of(context);
+    try {
+      this.collections = await MediaGallery.listMediaCollections(
+        mediaTypes: selection.mediaTypes,
+      );
+      this.setState(() {});
+    } catch (e) {
+      print("Failed : $e");
     }
   }
 

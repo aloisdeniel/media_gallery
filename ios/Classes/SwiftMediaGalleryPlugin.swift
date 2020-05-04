@@ -62,6 +62,7 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
     
     private func listMediaCollections(mediaTypes: [String]) -> [NSDictionary] {
         self.collections = []
+        var total = 0
         let fetchOptions = PHFetchOptions()
         var collections = [NSDictionary]()
         
@@ -76,6 +77,7 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
                                 }
                                 let count = PHAsset.fetchAssets(in: collection, options: options).count
             if(count > 0 || !hideIfEmpty) {
+                total+=count;
                 self.collections.append(collection);
                 collections.append([
                              "id": collection.localIdentifier,
@@ -142,8 +144,25 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
         processPHCollections((fetchResult: PHAssetCollection.fetchTopLevelUserCollections(with: fetchOptions),
                               hideIfEmpty: false))
         
+        collections.insert([
+            "id": "__ALL__",
+            "collectionType": "album",
+            "name": "All",
+            "count" : countMedias(collection: nil, mediaTypes: mediaTypes),
+        ], at: 0)
+        
         return collections
      }
+    
+    private func countMedias(collection: PHAssetCollection?, mediaTypes: [String]) -> Int {
+        let options = PHFetchOptions()
+        options.predicate = self.predicateFromMediaTypes(mediaTypes: mediaTypes)
+        if(collection == nil) {
+            return PHAsset.fetchAssets(with: options).count
+        }
+        
+        return PHAsset.fetchAssets(in: collection!, options: options).count
+    }
     
     private func listMedias(collectionId: String, skip: NSNumber?, take: NSNumber?, mediaType: String) -> NSDictionary {
         let fetchOptions = PHFetchOptions()
@@ -153,7 +172,8 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
         let collection = self.collections.first(where: { (collection) -> Bool in
             collection.localIdentifier == collectionId
         });
-        let fetchResult = PHAsset.fetchAssets(in: collection!, options: fetchOptions)
+     
+        let fetchResult = collectionId == "__ALL__" ? PHAsset.fetchAssets(with: fetchOptions) :  PHAsset.fetchAssets(in: collection!, options: fetchOptions)
         let start = skip?.intValue ?? 0;
         let total = fetchResult.count
         let end = take == nil ? total : min(start + take!.intValue, total)
@@ -222,10 +242,11 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
             fetchOptions.fetchLimit = 1
         }
         
-        let collection = self.collections.first(where: { (collection) -> Bool in
-            collection.localIdentifier == collectionId
-        });
-        let assets = PHAsset.fetchAssets(in: collection!, options: fetchOptions)
+        let assets = collectionId == "__ALL__" ?
+            PHAsset.fetchAssets(with: fetchOptions) :
+            PHAsset.fetchAssets(in: self.collections.first(where: { (collection) -> Bool in
+                collection.localIdentifier == collectionId
+            })!, options: fetchOptions)
         
         if (assets.count > 0) {
             let asset: PHAsset = assets[0];
@@ -244,11 +265,13 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
                options: options,
                resultHandler: {
                    (image: UIImage?, info) in
-                let bytes = image!.jpegData(compressionQuality: CGFloat(70));
+                let bytes = image!.jpegData(compressionQuality: CGFloat(80));
                 completion(bytes, nil);
            })
-
+            return;
         }
+        
+         completion(nil , NSError(domain: "media_gallery", code: 6, userInfo: nil))
     }
     
     private func getMediaFile(mediaId: String,completion: @escaping (String?, Error?)->()) {

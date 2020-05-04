@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:media_gallery/media_gallery.dart';
 import 'package:media_gallery_example/picker/picker.dart';
 import 'package:media_gallery_example/picker/selection.dart';
 
@@ -17,6 +18,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: Text("Media Gallery"),
@@ -27,16 +29,7 @@ class _MyAppState extends State<MyApp> {
         floatingActionButton: Builder(
           builder: (context) => FloatingActionButton(
             onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MediaPicker(
-                    initialSelection: MediaPickerSelection(
-                      maxItems: 4,
-                    ),
-                  ),
-                ),
-              );
+              final result = await MediaPicker.show(context);
               if (result != null) {
                 setState(() => selection = result);
               }

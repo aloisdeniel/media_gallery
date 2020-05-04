@@ -1,3 +1,8 @@
+## 0.1.2
+
+* Added "All" collection. 
+* Improved picker example.
+
 ## 0.1.1
 
 * Fixed issue with total video count.

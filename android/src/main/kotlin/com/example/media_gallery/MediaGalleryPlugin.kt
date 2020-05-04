@@ -112,6 +112,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
   private fun listMediaCollections(mediaTypes: List<String>) : List<Map<String,Any>>  {
     this.context.let { context ->
       if (context is Context) {
+        var total = 0
         val albumHashMap = mutableMapOf<Long, MutableMap<String, Any>>()
 
         // Getting images
@@ -151,63 +152,70 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                 val count = album["count"] as Int
                 album["count"] = count + 1
               }
+              total++
             }
             imageCursor.close()
           }
-
-          // Getting videos
-          if (mediaTypes.contains("video")) {
-            val videoOrderBy = MediaStore.Images.Media._ID + " DESC"
-            val videoProjection = arrayOf(
-                    MediaStore.Video.Media._ID,
-                    MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
-                    MediaStore.Video.Media.BUCKET_ID)
-
-            val videoCursor = context.contentResolver.query(
-                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                    videoProjection,
-                    null,
-                    null,
-                    videoOrderBy)
-
-            if (videoCursor != null) {
-              val bucketColumn = videoCursor
-                      .getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
-              val bucketColumnId = videoCursor
-                      .getColumnIndex(MediaStore.Video.Media.BUCKET_ID)
-
-              while (videoCursor.moveToNext()) {
-                val folderName = videoCursor.getString(bucketColumn)
-
-                val bucketId = videoCursor.getInt(bucketColumnId)
-                val album = albumHashMap[bucketId.toLong()]
-                if (album == null) {
-                  albumHashMap[bucketId.toLong()] = mutableMapOf(
-                          "id" to bucketId.toString(),
-                          "collectionType" to "album",
-                          "name" to folderName,
-                          "count" to 1
-                  )
-                } else {
-                  val count = album["count"] as Int
-                  album["count"] = count + 1
-                }
-              }
-              videoCursor.close()
-            }
-          }
-
-          val albumList = mutableListOf<Map<String, Any>>()
-
-          for ((id, album) in albumHashMap) {
-            if (id == 0L)
-              albumList.add(0, album.toMap())
-            else
-              albumList.add(album.toMap())
-          }
-
-          return albumList
         }
+
+        // Getting videos
+        if (mediaTypes.contains("video")) {
+          val videoOrderBy = MediaStore.Video.Media._ID + " DESC"
+          val videoProjection = arrayOf(
+                  MediaStore.Video.Media._ID,
+                  MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
+                  MediaStore.Video.Media.BUCKET_ID)
+
+          val videoCursor = context.contentResolver.query(
+                  MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                  videoProjection,
+                  null,
+                  null,
+                  videoOrderBy)
+
+          if (videoCursor != null) {
+            val bucketColumn = videoCursor
+                    .getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
+            val bucketColumnId = videoCursor
+                    .getColumnIndex(MediaStore.Video.Media.BUCKET_ID)
+
+            while (videoCursor.moveToNext()) {
+              val folderName = videoCursor.getString(bucketColumn)
+
+              val bucketId = videoCursor.getInt(bucketColumnId)
+              val album = albumHashMap[bucketId.toLong()]
+              if (album == null) {
+                albumHashMap[bucketId.toLong()] = mutableMapOf(
+                        "id" to bucketId.toString(),
+                        "collectionType" to "album",
+                        "name" to folderName,
+                        "count" to 1
+                )
+              } else {
+                val count = album["count"] as Int
+                album["count"] = count + 1
+              }
+              total++
+            }
+            videoCursor.close()
+          }
+        }
+
+        val albumList = mutableListOf<Map<String, Any>>()
+
+        albumList.add(mapOf(
+                "id" to "__ALL__",
+                "collectionType" to "album",
+                "name" to "All",
+                "count" to total))
+
+        for ((id, album) in albumHashMap) {
+            albumList.add(album.toMap())
+        }
+
+
+
+        return albumList
       }
     }
 
@@ -225,7 +233,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
           val imageCountCursor = context.contentResolver.query(
                   MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                   arrayOf("count(*) AS count"),
-                  "bucket_id = $collectionId",
+                  if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
                   null,
                   null)
           imageCountCursor!!.moveToFirst()
@@ -248,7 +256,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
           val c = context.contentResolver.query(
                   MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                   projection,
-                  "bucket_id = $collectionId",
+                  if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
                   null,
                   "$orderBy LIMIT $limit OFFSET $offset")
 
@@ -298,7 +306,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
         val videoCountCursor = context.contentResolver.query(
                   MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                   arrayOf("count(*) AS count"),
-                  "bucket_id = $collectionId",
+                if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
                   null,
                   null)
           videoCountCursor!!.moveToFirst()
@@ -320,7 +328,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
           val c = context.contentResolver.query(
                   MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                   projection,
-                  "bucket_id = $collectionId",
+                  if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
                   null,
                   orderBy  + " LIMIT $limit OFFSET $offset")
 
@@ -414,7 +422,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
         val imageCursor = context.contentResolver.query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 imageProjection,
-                "bucket_id = $collectionId",
+                if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
                 null,
                 MediaStore.Images.Media.DATE_TAKEN + " DESC LIMIT 1")
         if (imageCursor != null) {
@@ -431,7 +439,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
         val videoCursor = context.contentResolver.query(
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 videoProjection,
-                "bucket_id = $collectionId",
+                if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
                 null,
                 MediaStore.Video.Media.DATE_TAKEN + " DESC LIMIT 1")
         if (videoCursor != null) {

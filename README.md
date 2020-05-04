@@ -106,3 +106,11 @@ FadeInImage(
 ```
 
 To display a video, you can use [video_player](https://pub.dev/packages/video_player).
+
+#### Image/Video picker
+
+![picker](doc/picker.png)
+
+You can build a gallery picker easily with this package.
+
+See the [example](example) for more details.

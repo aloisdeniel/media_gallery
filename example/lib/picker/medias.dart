@@ -19,8 +19,9 @@ class MediasPage extends StatefulWidget {
 class _MediaImagesPageState extends State<MediasPage> {
   @override
   Widget build(BuildContext context) {
+    final selection = MediaPickerSelection.of(context);
     return DefaultTabController(
-      length: 2,
+      length: selection.mediaTypes.length,
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.collection.name),
@@ -29,26 +30,25 @@ class _MediaImagesPageState extends State<MediasPage> {
               onValidate: (selection) => Navigator.pop(context, selection),
             ),
           ],
-          bottom: TabBar(
-            tabs: [
-              Tab(text: "Photos"),
-              Tab(text: "Videos"),
-            ],
-          ),
+          bottom: selection.mediaTypes.length > 1
+              ? TabBar(
+                  tabs: [
+                    Tab(text: "Photos"),
+                    Tab(text: "Videos"),
+                  ],
+                )
+              : null,
         ),
         body: TabBarView(
-          children: [
-            _MediaGrid(
-              key: Key("image"),
-              collection: widget.collection,
-              mediaType: MediaType.image,
-            ),
-            _MediaGrid(
-              key: Key("video"),
-              collection: widget.collection,
-              mediaType: MediaType.video,
-            ),
-          ],
+          children: selection.mediaTypes
+              .map(
+                (x) => _MediaGrid(
+                  key: Key(x.toString()),
+                  collection: widget.collection,
+                  mediaType: x,
+                ),
+              )
+              .toList(),
         ),
       ),
     );

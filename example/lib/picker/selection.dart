@@ -3,9 +3,14 @@ import 'package:media_gallery/media_gallery.dart';
 
 class MediaPickerSelection extends ChangeNotifier {
   final List<Media> selectedMedias;
+  final List<MediaType> mediaTypes;
   final int maxItems;
   MediaPickerSelection({
     this.maxItems,
+    this.mediaTypes = const <MediaType>[
+      MediaType.image,
+      MediaType.video,
+    ],
     List<Media> selectedMedias,
   }) : this.selectedMedias = selectedMedias ?? <Media>[];
 
