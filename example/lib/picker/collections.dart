@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'labels.dart';
 import 'package:media_gallery/media_gallery.dart';
-import 'package:media_gallery_example/picker/selection.dart';
-import 'package:media_gallery_example/picker/validate.dart';
-import 'package:permission_handler/permission_handler.dart';
 
+import 'albums.dart';
+import 'selection.dart';
+import 'validate.dart';
 import 'medias.dart';
 import 'thumbnail.dart';
 
@@ -26,60 +27,66 @@ class _MediaCollectionsPageState extends State<MediaCollectionsPage> {
   Future<void> initAsync() async {
     final selection = MediaPickerSelection.of(context);
     try {
-      this.collections = await MediaGallery.listMediaCollections(
+      collections = await MediaGallery.listMediaCollections(
         mediaTypes: selection.mediaTypes,
       );
-      this.setState(() {});
+      setState(() {});
     } catch (e) {
-      print("Failed : $e");
+      print('Failed : $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final selection = MediaPickerSelection.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Select medias'),
-        actions: <Widget>[
-          PickerValidateButton(
-            onValidate: (selection) => Navigator.pop(context, selection),
-          ),
-        ],
-      ),
-      body: ListView(
-        children: <Widget>[
-          ...collections.map<Widget>(
-            (x) => Card(
-              child: ListTile(
-                leading: SizedBox(
-                  width: 64,
-                  child: MediaCollectionThumbnailImage(collection: x),
-                ),
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MediaPickerSelectionProvider(
-                        selection: selection,
-                        child: MediasPage(
-                          collection: x,
-                        ),
-                      ),
-                    ),
-                  );
-                  if (result != null) {
-                    Navigator.pop(context, result);
-                  }
-                },
-                title: Text(
-                  x.name,
-                ),
-                subtitle: Text("${x.count} item(s)"),
-              ),
+    final labels = MediaPickerLabels.of(context);
+    final allCollection = collections.firstWhere(
+      (c) => c.isAllCollection,
+      orElse: () => null,
+    );
+    return DefaultTabController(
+      length: selection.mediaTypes.length + 1,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(labels.collectionsTitle),
+          actions: <Widget>[
+            PickerValidateButton(
+              onValidate: (selection) => Navigator.pop(context, selection),
             ),
-          )
-        ],
+          ],
+          bottom: TabBar(
+            tabs: [
+              ...selection.mediaTypes.map(
+                (x) => Tab(
+                  text: x == MediaType.video ? labels.videos : labels.images,
+                ),
+              ),
+              Tab(
+                text: labels.albums,
+              ),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            ...selection.mediaTypes.map(
+              (x) => allCollection == null
+                  ? SizedBox()
+                  : MediaGrid(
+                      key: Key(x.toString()),
+                      collection: allCollection,
+                      mediaType: x,
+                    ),
+            ),
+            MediaAlbums(
+              collections: collections
+                  .where(
+                    (x) => !x.isAllCollection,
+                  )
+                  .toList(),
+            ),
+          ],
+        ),
       ),
     );
   }

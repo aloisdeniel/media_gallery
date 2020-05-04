@@ -1,3 +1,8 @@
+## 0.1.3
+
+* Updated example
+* Fixed error when no thumbnail.
+
 ## 0.1.2
 
 * Added "All" collection. 

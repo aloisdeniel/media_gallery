@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:media_gallery_example/picker/selection.dart';
+
+import 'selection.dart';
 
 class PickerValidateButton extends StatelessWidget {
   final ValueChanged<MediaPickerSelection> onValidate;
@@ -22,7 +23,8 @@ class PickerValidateButton extends StatelessWidget {
               duration: const Duration(milliseconds: 100),
               opacity: selection.selectedMedias.isNotEmpty ? 1.0 : 0.3,
               child: Material(
-                color: Colors.white,
+                color: (theme.appBarTheme.iconTheme ?? IconTheme.of(context))
+                    .color,
                 borderRadius: BorderRadius.circular(100),
                 child: InkWell(
                   focusColor: theme.accentColor.withOpacity(0.2),

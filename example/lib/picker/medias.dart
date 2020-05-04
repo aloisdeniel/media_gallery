@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:media_gallery/media_gallery.dart';
-import 'package:media_gallery_example/picker/selection.dart';
-import 'package:media_gallery_example/picker/validate.dart';
 
+import 'labels.dart';
+import 'selection.dart';
+import 'validate.dart';
 import 'selectable.dart';
 import 'thumbnail.dart';
 
@@ -20,6 +21,7 @@ class _MediaImagesPageState extends State<MediasPage> {
   @override
   Widget build(BuildContext context) {
     final selection = MediaPickerSelection.of(context);
+    final labels = MediaPickerLabels.of(context);
     return DefaultTabController(
       length: selection.mediaTypes.length,
       child: Scaffold(
@@ -32,17 +34,22 @@ class _MediaImagesPageState extends State<MediasPage> {
           ],
           bottom: selection.mediaTypes.length > 1
               ? TabBar(
-                  tabs: [
-                    Tab(text: "Photos"),
-                    Tab(text: "Videos"),
-                  ],
+                  tabs: selection.mediaTypes
+                      .map(
+                        (x) => Tab(
+                          text: x == MediaType.video
+                              ? labels.videos
+                              : labels.images,
+                        ),
+                      )
+                      .toList(),
                 )
               : null,
         ),
         body: TabBarView(
           children: selection.mediaTypes
               .map(
-                (x) => _MediaGrid(
+                (x) => MediaGrid(
                   key: Key(x.toString()),
                   collection: widget.collection,
                   mediaType: x,
@@ -55,10 +62,10 @@ class _MediaImagesPageState extends State<MediasPage> {
   }
 }
 
-class _MediaGrid extends StatefulWidget {
+class MediaGrid extends StatefulWidget {
   final MediaCollection collection;
   final MediaType mediaType;
-  _MediaGrid({
+  MediaGrid({
     Key key,
     @required this.mediaType,
     @required this.collection,
@@ -68,7 +75,7 @@ class _MediaGrid extends StatefulWidget {
   _MediaGridState createState() => _MediaGridState();
 }
 
-class _MediaGridState extends State<_MediaGrid>
+class _MediaGridState extends State<MediaGrid>
     with AutomaticKeepAliveClientMixin {
   List<MediaPage> pages = [];
   bool isLoading = false;

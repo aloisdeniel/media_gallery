@@ -2,25 +2,33 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:media_gallery/media_gallery.dart';
-import 'package:media_gallery_example/picker/collections.dart';
-import 'package:media_gallery_example/picker/selection.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'collections.dart';
+import 'labels.dart';
+import 'selection.dart';
 
 class MediaPicker extends StatefulWidget {
   final MediaPickerSelection initialSelection;
+  final MediaPickerLabels labels;
 
   const MediaPicker({
     Key key,
+    this.labels,
     this.initialSelection,
   });
 
-  static Future<MediaPickerSelection> show(BuildContext context) async {
+  static Future<MediaPickerSelection> show(
+    BuildContext context, {
+    int maxImages = 10,
+    MediaPickerLabels labels,
+  }) async {
     final mediaStatus = await Permission.photos.status;
     if (mediaStatus.isDenied && Platform.isIOS) {
-      showDialog(
+      await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Not authorized"),
+          title: Text('Not authorized'),
           content: Text(
               "This app can't have access to user media gallery. You must update authorizations in app settings."),
           actions: <Widget>[
@@ -40,12 +48,13 @@ class MediaPicker extends StatefulWidget {
         context,
         MaterialPageRoute(
           builder: (context) => MediaPicker(
+            labels: labels,
             initialSelection: MediaPickerSelection(
               mediaTypes: [
                 MediaType.image,
-                MediaType.video,
+                //MediaType.video,
               ],
-              maxItems: 4,
+              maxItems: 10,
             ),
           ),
         ),
@@ -72,7 +81,10 @@ class _MediaPickerState extends State<MediaPicker> {
   Widget build(BuildContext context) {
     return MediaPickerSelectionProvider(
       selection: _selection,
-      child: MediaCollectionsPage(),
+      child: MediaPickerLabelsProvider(
+        value: widget.labels ?? MediaPickerLabels.fallback(),
+        child: MediaCollectionsPage(),
+      ),
     );
   }
 }

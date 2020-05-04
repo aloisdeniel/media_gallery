@@ -71,7 +71,7 @@ class MediaCollectionThumbnailProvider
       MediaCollectionThumbnailProvider key, DecoderCallback decode) async {
     assert(key == this);
     final bytes = await collection.getThumbnail();
-    if (bytes.length == 0) return null;
+    if (bytes == null || bytes.length == 0) return null;
 
     return await decode(bytes);
   }

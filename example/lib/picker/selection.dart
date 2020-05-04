@@ -5,6 +5,7 @@ class MediaPickerSelection extends ChangeNotifier {
   final List<Media> selectedMedias;
   final List<MediaType> mediaTypes;
   final int maxItems;
+
   MediaPickerSelection({
     this.maxItems,
     this.mediaTypes = const <MediaType>[
@@ -12,7 +13,7 @@ class MediaPickerSelection extends ChangeNotifier {
       MediaType.video,
     ],
     List<Media> selectedMedias,
-  }) : this.selectedMedias = selectedMedias ?? <Media>[];
+  }) : selectedMedias = selectedMedias ?? <Media>[];
 
   static MediaPickerSelection of(BuildContext context) {
     final provider = context
