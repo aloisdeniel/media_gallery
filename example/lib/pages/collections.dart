@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:media_gallery/media_gallery.dart';
-import 'package:media_gallery_example/medias.dart';
+import 'package:media_gallery_example/pages/medias.dart';
+import 'package:media_gallery_example/pages/thumbnail.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MediaCollectionsPage extends StatefulWidget {
   @override
@@ -19,13 +21,15 @@ class _MediaCollectionsPageState extends State<MediaCollectionsPage> {
   }
 
   Future<void> initAsync() async {
-    try {
-      this.collections = await MediaGallery.listMediaCollections(
-        mediaTypes: [MediaType.image],
-      );
-      this.setState(() {});
-    } catch (e) {
-      print("Failed : $e");
+    if (await Permission.storage.request().isGranted) {
+      try {
+        this.collections = await MediaGallery.listMediaCollections(
+          mediaTypes: [MediaType.image, MediaType.video],
+        );
+        this.setState(() {});
+      } catch (e) {
+        print("Failed : $e");
+      }
     }
   }
 
@@ -40,6 +44,10 @@ class _MediaCollectionsPageState extends State<MediaCollectionsPage> {
           ...collections.map<Widget>(
             (x) => Card(
               child: ListTile(
+                leading: SizedBox(
+                  width: 64,
+                  child: MediaCollectionThumbnailImage(collection: x),
+                ),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -53,6 +61,7 @@ class _MediaCollectionsPageState extends State<MediaCollectionsPage> {
                 title: Text(
                   x.name,
                 ),
+                subtitle: Text("${x.count} item(s)"),
               ),
             ),
           )

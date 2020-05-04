@@ -21,18 +21,28 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
     else if(call.method == "listMedias") {
         let arguments = call.arguments as! Dictionary<String, AnyObject>
         let collectionId = arguments["collectionId"] as! String;
-        let skip = arguments["skip"] as? Int;
-        let take = arguments["take"] as? Int;
-        let mediaTypes = arguments["mediaTypes"] as! [String];
-        result(listMedias(collectionId:collectionId, skip:skip, take: take,  mediaTypes: mediaTypes))
+        let skip = arguments["skip"] as? NSNumber;
+        let take = arguments["take"] as? NSNumber;
+        let mediaType = arguments["mediaType"] as! String;
+        result(listMedias(collectionId:collectionId, skip:skip, take: take,  mediaType: mediaType))
     }
-    else if(call.method == "getMediaTumbnail") {
+    else if(call.method == "getMediaThumbnail") {
         let arguments = call.arguments as! Dictionary<String, AnyObject>
         let mediaId = arguments["mediaId"] as! String;
+        let width = arguments["width"] as? NSNumber;
+        let height = arguments["height"] as? NSNumber;
+        let highQuality = arguments["highQuality"] as? Bool;
+        getMediaThumbnail(mediaId: mediaId, width: width, height: height, highQuality: highQuality, completion:{ (data: Data?, error: Error?) -> () in
+            result(data);
+        })
+    }
+    else if(call.method == "getCollectionThumbnail") {
+        let arguments = call.arguments as! Dictionary<String, AnyObject>
+        let collectionId = arguments["collectionId"] as! String;
         let width = arguments["width"] as? Int;
         let height = arguments["height"] as? Int;
         let highQuality = arguments["highQuality"] as? Bool;
-        getMediaTumbnail(mediaId: mediaId, width: width, height: height, highQuality: highQuality, completion:{ (data: Data?, error: Error?) -> () in
+        getCollectionThumbnail(collectionId: collectionId, width: width, height: height, highQuality: highQuality, completion:{ (data: Data?, error: Error?) -> () in
             result(data);
         })
     }
@@ -135,18 +145,18 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
         return collections
      }
     
-    private func listMedias(collectionId: String, skip: Int?, take: Int?, mediaTypes: [String]) -> NSDictionary {
+    private func listMedias(collectionId: String, skip: NSNumber?, take: NSNumber?, mediaType: String) -> NSDictionary {
         let fetchOptions = PHFetchOptions()
         fetchOptions.sortDescriptors = [NSSortDescriptor(key:"creationDate", ascending: false)]
-        fetchOptions.predicate = predicateFromMediaTypes(mediaTypes: mediaTypes)
+        fetchOptions.predicate = predicateFromMediaType(mediaType: mediaType)
         
         let collection = self.collections.first(where: { (collection) -> Bool in
             collection.localIdentifier == collectionId
         });
         let fetchResult = PHAsset.fetchAssets(in: collection!, options: fetchOptions)
-        let start = skip ?? 0;
+        let start = skip?.intValue ?? 0;
         let total = fetchResult.count
-        let end = take == nil ? total : (start + take!)
+        let end = take == nil ? total : min(start + take!.intValue, total)
         var items = [NSDictionary]()
         for index in start..<end
         {
@@ -164,11 +174,11 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
         
         return [
             "start": start,
-            "totalItems": total,
+            "total": total,
             "items": items]
     }
     
-    private func getMediaTumbnail(mediaId: String, width: Int?, height: Int?, highQuality: Bool?, completion: @escaping (Data?, Error?)->()) {
+    private func getMediaThumbnail(mediaId: String, width: NSNumber?, height: NSNumber?, highQuality: Bool?, completion: @escaping (Data?, Error?)->()) {
         
         let manager = PHImageManager.default()
             
@@ -178,6 +188,45 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
         }
         let assets: PHFetchResult = PHAsset.fetchAssets(withLocalIdentifiers: [mediaId], options: fetchOptions)
 
+        if (assets.count > 0) {
+            let asset: PHAsset = assets[0];
+            
+            let options = PHImageRequestOptions()
+            options.deliveryMode = (highQuality ?? false) ?  PHImageRequestOptionsDeliveryMode.highQualityFormat : PHImageRequestOptionsDeliveryMode.fastFormat
+            options.isSynchronous = false
+            options.isNetworkAccessAllowed = true
+            options.version = .current
+
+            let imageSize = CGSize(width: width?.intValue ?? 128, height: height?.intValue ?? 128)
+            manager.requestImage(
+               for: asset,
+               targetSize: CGSize(width: imageSize.width *  UIScreen.main.scale, height: imageSize.height *  UIScreen.main.scale),
+               contentMode: PHImageContentMode.aspectFill,
+               options: options,
+               resultHandler: {
+                   (image: UIImage?, info) in
+                let bytes = image!.jpegData(compressionQuality: CGFloat(70));
+                completion(bytes, nil);
+           })
+
+        }
+    }
+    
+    private func getCollectionThumbnail(collectionId: String, width: Int?, height: Int?, highQuality: Bool?, completion: @escaping (Data?, Error?)->()) {
+        
+        let manager = PHImageManager.default()
+            
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key:"creationDate", ascending: false)]
+        if #available(iOS 9, *) {
+            fetchOptions.fetchLimit = 1
+        }
+        
+        let collection = self.collections.first(where: { (collection) -> Bool in
+            collection.localIdentifier == collectionId
+        });
+        let assets = PHAsset.fetchAssets(in: collection!, options: fetchOptions)
+        
         if (assets.count > 0) {
             let asset: PHAsset = assets[0];
             
@@ -326,12 +375,15 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
     
     private func predicateFromMediaTypes(mediaTypes: [String]) -> NSPredicate {
         let predicates = mediaTypes.map { (dartValue) -> NSPredicate in
-            let swiftType = toSwiftMediaType(value: dartValue);
-            return NSPredicate(format: "mediaType = %d", swiftType!.rawValue);
+            return predicateFromMediaType(mediaType: dartValue);
         }
         
         return NSCompoundPredicate (type: NSCompoundPredicate.LogicalType.or, subpredicates:predicates);
-        
+    }
+    
+    private func predicateFromMediaType(mediaType: String) -> NSPredicate {
+        let swiftType = toSwiftMediaType(value: mediaType);
+        return NSPredicate(format: "mediaType = %d", swiftType!.rawValue);
     }
 }
 

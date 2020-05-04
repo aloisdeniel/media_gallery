@@ -7,6 +7,9 @@ environment:
 
 dependencies:
   exif:
+  permission_handler:
+  video_player:
+  transparent_image:
   flutter:
     sdk: flutter
 

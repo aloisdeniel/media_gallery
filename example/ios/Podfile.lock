@@ -2,20 +2,38 @@ PODS:
   - Flutter (1.0.0)
   - media_gallery (0.0.1):
     - Flutter
+  - "permission_handler (5.0.0+hotfix.4)":
+    - Flutter
+  - video_player (0.0.1):
+    - Flutter
+  - video_player_web (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - media_gallery (from `.symlinks/plugins/media_gallery/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - video_player (from `.symlinks/plugins/video_player/ios`)
+  - video_player_web (from `.symlinks/plugins/video_player_web/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   media_gallery:
     :path: ".symlinks/plugins/media_gallery/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
+  video_player:
+    :path: ".symlinks/plugins/video_player/ios"
+  video_player_web:
+    :path: ".symlinks/plugins/video_player_web/ios"
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   media_gallery: 834a04455a476b975c280aa1f24ed2853dfe36de
+  permission_handler: 303c2050a9543399244cfb2be8cc70fd14334b89
+  video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
+  video_player_web: da8cadb8274ed4f8dbee8d7171b420dedd437ce7
 
 PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
 

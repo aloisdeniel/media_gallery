@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:media_gallery_example/collections.dart';
+import 'package:media_gallery_example/pages/collections.dart';
 
 void main() => runApp(MyApp());
 
