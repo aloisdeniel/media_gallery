@@ -295,17 +295,15 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
 
     this.context.let { context ->
       if (context is Context) {
-
         val videoCountCursor = context.contentResolver.query(
                   MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                   arrayOf("count(*) AS count"),
-                  null,
+                  "bucket_id = $collectionId",
                   null,
                   null)
           videoCountCursor!!.moveToFirst()
           total += videoCountCursor.getInt(0)
           videoCountCursor.close()
-
 
           // Getting range of video
           val limit = take ?: (total - offset)

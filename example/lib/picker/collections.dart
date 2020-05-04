@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:media_gallery/media_gallery.dart';
-import 'package:media_gallery_example/pages/medias.dart';
-import 'package:media_gallery_example/pages/thumbnail.dart';
+import 'package:media_gallery_example/picker/selection.dart';
+import 'package:media_gallery_example/picker/validate.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'medias.dart';
+import 'thumbnail.dart';
 
 class MediaCollectionsPage extends StatefulWidget {
   @override
@@ -35,9 +38,15 @@ class _MediaCollectionsPageState extends State<MediaCollectionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final selection = MediaPickerSelection.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Collections'),
+        title: Text('Select medias'),
+        actions: <Widget>[
+          PickerValidateButton(
+            onValidate: (selection) => Navigator.pop(context, selection),
+          ),
+        ],
       ),
       body: ListView(
         children: <Widget>[
@@ -48,15 +57,21 @@ class _MediaCollectionsPageState extends State<MediaCollectionsPage> {
                   width: 64,
                   child: MediaCollectionThumbnailImage(collection: x),
                 ),
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MediasPage(
-                        collection: x,
+                      builder: (context) => MediaPickerSelectionProvider(
+                        selection: selection,
+                        child: MediasPage(
+                          collection: x,
+                        ),
                       ),
                     ),
                   );
+                  if (result != null) {
+                    Navigator.pop(context, result);
+                  }
                 },
                 title: Text(
                   x.name,
