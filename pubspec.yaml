@@ -1,6 +1,6 @@
 name: media_gallery
 description: A Flutter plugin that lists native gallery items.
-version: 0.1.3
+version: 0.1.4
 homepage: https://github.com/aloisdeniel/media_gallery
 
 environment:

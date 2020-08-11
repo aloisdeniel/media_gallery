@@ -1,3 +1,7 @@
+## 0.1.4
+
+* Fixed error when missing thumbnail on iOS.
+
 ## 0.1.3
 
 * Updated example

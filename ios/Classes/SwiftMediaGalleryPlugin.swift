@@ -225,8 +225,13 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
                options: options,
                resultHandler: {
                    (image: UIImage?, info) in
-                let bytes = image!.jpegData(compressionQuality: CGFloat(70));
-                completion(bytes, nil);
+                   if let withImage = image {
+                        let bytes = withImage.jpegData(compressionQuality: CGFloat(70));
+                        completion(bytes, nil);
+                    }
+                   else {
+                    completion(nil , NSError(domain: "media_gallery", code: 6, userInfo: nil))
+                }
            })
 
         }
@@ -265,8 +270,12 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
                options: options,
                resultHandler: {
                    (image: UIImage?, info) in
-                let bytes = image!.jpegData(compressionQuality: CGFloat(80));
-                completion(bytes, nil);
+                   if let withImage = image {
+                    let bytes = withImage.jpegData(compressionQuality: CGFloat(80));
+                    completion(bytes, nil);
+                }else {
+                    completion(nil , NSError(domain: "media_gallery", code: 6, userInfo: nil))
+                }
            })
             return;
         }
