@@ -8,11 +8,13 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import android.graphics.Bitmap
-import java.io.ByteArrayOutputStream
+import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.content.Context
 import android.os.AsyncTask
 import android.graphics.Matrix
+import java.io.ByteArrayOutputStream
 
 /** MediaGalleryPlugin */
 class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
@@ -222,6 +224,26 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
     return listOf()
   }
 
+  private fun countTotalInBucket(collectionId: String, uri: Uri) : Int {
+    this.context.let { context ->
+      if (context is Context) {
+        val projection = arrayOf(MediaStore.Images.Media._ID);
+        val cursor = context.contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
+            null,
+            null)
+
+        if(cursor == null || !cursor.moveToFirst()) {
+          return 0
+        }
+        return cursor.getCount()
+      }
+      return 0
+    }
+  }
+
   private fun listImages(collectionId: String, skip: Int?, take: Int?) : Map<String,Any> {
     val medias = mutableListOf<Map<String, Any>>()
     val offset = skip ?: 0
@@ -229,16 +251,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
 
     this.context.let { context ->
       if (context is Context) {
-
-          val imageCountCursor = context.contentResolver.query(
-                  MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                  arrayOf("count(*) AS count"),
-                  if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
-                  null,
-                  null)
-          imageCountCursor!!.moveToFirst()
-          total += imageCountCursor.getInt(0)
-          imageCountCursor.close()
+          total += countTotalInBucket(collectionId, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
 
           // Getting range of images
           val limit = take ?: (total - offset)
@@ -303,15 +316,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
 
     this.context.let { context ->
       if (context is Context) {
-        val videoCountCursor = context.contentResolver.query(
-                  MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                  arrayOf("count(*) AS count"),
-                if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
-                  null,
-                  null)
-          videoCountCursor!!.moveToFirst()
-          total += videoCountCursor.getInt(0)
-          videoCountCursor.close()
+          total += countTotalInBucket(collectionId,  MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
 
           // Getting range of video
           val limit = take ?: (total - offset)
@@ -512,7 +517,9 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
 
   private fun rotatedBitmap(bitmap: Bitmap, orientation: Long) : ByteArray {
     val matrix = Matrix()
-    matrix.postRotate(orientation.toFloat())
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+      matrix.postRotate(orientation.toFloat())
+    }
     val resultBitmap = Bitmap.createBitmap(bitmap!!, 0, 0, bitmap!!.getWidth(), bitmap!!.getHeight(), matrix, true)
     val stream = ByteArrayOutputStream()
     resultBitmap!!.compress(Bitmap.CompressFormat.JPEG, 100, stream)

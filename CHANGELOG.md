@@ -1,3 +1,9 @@
+## 0.1.5
+
+* Fixed orientation on Android 10.
+* Fixed exception due to count call in content resolver on Android 10.
+
+
 ## 0.1.4
 
 * Fixed error when missing thumbnail on iOS.
