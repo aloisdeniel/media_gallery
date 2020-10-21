@@ -33,7 +33,7 @@ You should also manage those permissions (for example thanks to the [permission_
 #### Listing media collections
 
 ``` dart
-final MediaCollections collections = await MediaGallery.listMediaCollections(
+final List<MediaCollection> collections = await MediaGallery.listMediaCollections(
     mediaTypes: [MediaType.image, MediaType.video],
 );
 ```
@@ -41,11 +41,11 @@ final MediaCollections collections = await MediaGallery.listMediaCollections(
 #### Listing medias in a collection
 
 ``` dart
-final MediaPage imagePage = await widget.collection.getMedias(
+final MediaPage imagePage = await collection.getMedias(
     mediaType: MediaType.image,
     take: 500,
 );
-final MediaPage videoPage = await widget.collection.getMedias(
+final MediaPage videoPage = await collection.getMedias(
     mediaType: MediaType.video,
     take: 500,
 );
