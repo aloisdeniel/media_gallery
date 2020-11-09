@@ -123,7 +123,7 @@ class Media {
         width = json["width"],
         height = json["height"],
         creationDate =
-            DateTime.fromMillisecondsSinceEpoch(json["creationDate"] * 1000);
+            DateTime.fromMillisecondsSinceEpoch(json["creationDate"]);
 
   /// Get a JPEG thumbnail's data for this media.
   Future<List<int>> getThumbnail({
