@@ -72,11 +72,37 @@ class MediaPage {
   /// The current items.
   final List<Media> items;
 
+  MediaPage({
+    this.collection,
+    this.mediaType,
+    this.start,
+    this.total,
+    this.items,
+  });
+
   /// The end index in the collection.
   int get end => start + items.length;
 
   ///Indicates whether this page is the last in the collection.
   bool get isLast => end >= total;
+
+  MediaPage timeLimited(Duration pastLimit) {
+    if (pastLimit == null) return this;
+
+    final endIndex = items.indexWhere(
+        (media) => DateTime.now().difference(media.creationDate) > pastLimit);
+    if (endIndex == -1)
+      return this;
+    else {
+      return MediaPage(
+        collection: this.collection,
+        mediaType: this.mediaType,
+        start: this.start,
+        total: this.start + endIndex,
+        items: items.getRange(0, endIndex).toList(),
+      );
+    }
+  }
 
   /// Creates a range of media from platform channel protocol.
   MediaPage.fromJson(this.collection, this.mediaType, dynamic json)
