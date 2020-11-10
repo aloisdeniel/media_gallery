@@ -148,8 +148,9 @@ class Media {
         mediaType = _jsonToMediaType(json["mediaType"]),
         width = json["width"],
         height = json["height"],
-        creationDate =
-            DateTime.fromMillisecondsSinceEpoch(json["creationDate"]);
+        creationDate = DateTime.fromMillisecondsSinceEpoch(
+          Platform.isIOS ? json["creationDate"] * 1000 : json["creationDate"],
+        );
 
   /// Get a JPEG thumbnail's data for this media.
   Future<List<int>> getThumbnail({
