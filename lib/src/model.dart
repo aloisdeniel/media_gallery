@@ -112,7 +112,7 @@ class MediaPage {
 
   /// Gets the next page of medias in the collection.
   Future<MediaPage> nextPage() {
-    assert(!isLast);
+    assert(!isLast, 'it\'s last page, not possible to get next page');
     return MediaGallery._listMedias(
       collection: collection,
       mediaType: mediaType,
