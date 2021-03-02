@@ -72,11 +72,38 @@ class MediaPage {
   /// The current items.
   final List<Media> items;
 
+  MediaPage({
+    this.collection,
+    this.mediaType,
+    this.start,
+    this.total,
+    this.items,
+  });
+
   /// The end index in the collection.
   int get end => start + items.length;
 
-  ///Indicates whether this page is the last in the collection.
+  /// Indicates whether this page is the last in the collection.
   bool get isLast => end >= total;
+
+  /// Get the truncated page of medias not older than specified 'pastLimit'.
+  MediaPage timeLimited(Duration pastLimit) {
+    if (pastLimit == null) return this;
+
+    final endIndex = items.indexWhere(
+        (media) => DateTime.now().difference(media.creationDate) > pastLimit);
+    if (endIndex == -1) {
+      return this;
+    } else {
+      return MediaPage(
+        collection: this.collection,
+        mediaType: this.mediaType,
+        start: this.start,
+        total: this.start + endIndex,
+        items: items.getRange(0, endIndex).toList(),
+      );
+    }
+  }
 
   /// Creates a range of media from platform channel protocol.
   MediaPage.fromJson(this.collection, this.mediaType, dynamic json)
@@ -86,7 +113,7 @@ class MediaPage {
 
   /// Gets the next page of medias in the collection.
   Future<MediaPage> nextPage() {
-    assert(!isLast);
+    assert(!isLast, 'it\'s last page, not possible to get next page');
     return MediaGallery._listMedias(
       collection: collection,
       mediaType: mediaType,
@@ -122,8 +149,9 @@ class Media {
         mediaType = _jsonToMediaType(json["mediaType"]),
         width = json["width"],
         height = json["height"],
-        creationDate =
-            DateTime.fromMillisecondsSinceEpoch(json["creationDate"] * 1000);
+        creationDate = DateTime.fromMillisecondsSinceEpoch(
+          Platform.isIOS ? json["creationDate"] * 1000 : json["creationDate"],
+        );
 
   /// Get a JPEG thumbnail's data for this media.
   Future<List<int>> getThumbnail({
