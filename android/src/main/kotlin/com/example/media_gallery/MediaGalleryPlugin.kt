@@ -1,5 +1,6 @@
 package com.example.media_gallery
 
+import android.content.ContentResolver
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -14,6 +15,7 @@ import android.provider.MediaStore
 import android.content.Context
 import android.os.AsyncTask
 import android.graphics.Matrix
+import android.os.Bundle
 import java.io.ByteArrayOutputStream
 
 /** MediaGalleryPlugin */
@@ -266,34 +268,52 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                   MediaStore.Images.Media.DATE_TAKEN,
                   MediaStore.Images.Media.ORIENTATION)
 
-          val c = context.contentResolver.query(
-                  MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                  projection,
-                  if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
-                  null,
-                  "$orderBy LIMIT $limit OFFSET $offset")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                context.contentResolver.query(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        projection,
+                        Bundle().apply {
+                            putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
+                            putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
+                            putString(
+                                    ContentResolver.QUERY_ARG_SORT_COLUMNS,
+                                    MediaStore.Images.Media.DATE_TAKEN
+                            )
+                            putInt(
+                                    ContentResolver.QUERY_ARG_SORT_DIRECTION,
+                                    ContentResolver.QUERY_SORT_DIRECTION_DESCENDING
+                            )
+                            putString(ContentResolver.QUERY_ARG_SQL_SELECTION, if (collectionId == "__ALL__") null else "bucket_id = $collectionId")
+                        },
+                        null)
+            } else {
+                context.contentResolver.query(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        projection,
+                        if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
+                        null,
+                        "$orderBy LIMIT $limit OFFSET $offset")
+            }?.use { c ->
+                val idColumn = c.getColumnIndex(MediaStore.Images.Media._ID)
+                val heightColumn = c.getColumnIndex(MediaStore.Images.Media.HEIGHT)
+                val widthColumn = c.getColumnIndex(MediaStore.Images.Media.WIDTH)
+                val dateTakenColumn = c.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN)
 
-          if (c != null) {
-            val idColumn = c.getColumnIndex(MediaStore.Images.Media._ID)
-            val heightColumn = c.getColumnIndex(MediaStore.Images.Media.HEIGHT)
-            val widthColumn = c.getColumnIndex(MediaStore.Images.Media.WIDTH)
-            val dateTakenColumn = c.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN)
+                while (c.moveToNext()) {
 
-            while (c.moveToNext()) {
+                    val id = c.getLong(idColumn)
+                    val width = c.getLong(widthColumn)
+                    val height = c.getLong(heightColumn)
+                    val dateTaken = c.getLong(dateTakenColumn)
 
-              val id = c.getLong(idColumn)
-              val width = c.getLong(widthColumn)
-              val height = c.getLong(heightColumn)
-              val dateTaken = c.getLong(dateTakenColumn)
-
-              medias.add(mapOf(
-                      "id" to id.toString(),
-                      "mediaType" to "image",
-                      "mediaSubtypes" to listOf<String>(),
-                      "isFavorite" to false,
-                      "width" to width,
-                      "height" to height,
-                      "creationDate" to dateTaken))
+                    medias.add(mapOf(
+                            "id" to id.toString(),
+                            "mediaType" to "image",
+                            "mediaSubtypes" to listOf<String>(),
+                            "isFavorite" to false,
+                            "width" to width,
+                            "height" to height,
+                            "creationDate" to dateTaken))
 
             }
             c.close()
@@ -330,40 +350,57 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                   MediaStore.Video.Media.WIDTH,
                   MediaStore.Video.Media.DATE_TAKEN)
 
-          val c = context.contentResolver.query(
-                  MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                  projection,
-                  if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
-                  null,
-                  orderBy  + " LIMIT $limit OFFSET $offset")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                context.contentResolver.query(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        projection,
+                        Bundle().apply {
+                            putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
+                            putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
+                            putString(
+                                    ContentResolver.QUERY_ARG_SORT_COLUMNS,
+                                    MediaStore.Images.Media.DATE_TAKEN
+                            )
+                            putInt(
+                                    ContentResolver.QUERY_ARG_SORT_DIRECTION,
+                                    ContentResolver.QUERY_SORT_DIRECTION_DESCENDING
+                            )
+                            putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection)
+                        },
+                        null)
+            } else {
+                context.contentResolver.query(
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                        projection,
+                        selection,
+                        null,
+                        orderBy + " LIMIT $limit OFFSET $offset")
+            }?.use { c ->
+                val idColumn = c.getColumnIndex(MediaStore.Video.Media._ID)
+                val heightColumn = c.getColumnIndex(MediaStore.Video.Media.HEIGHT)
+                val widthColumn = c.getColumnIndex(MediaStore.Video.Media.WIDTH)
+                val dateTakenColumn = c.getColumnIndex(MediaStore.Video.Media.DATE_TAKEN)
 
-          if (c != null) {
-            val idColumn = c.getColumnIndex(MediaStore.Video.Media._ID)
-            val heightColumn = c.getColumnIndex(MediaStore.Video.Media.HEIGHT)
-            val widthColumn = c.getColumnIndex(MediaStore.Video.Media.WIDTH)
-            val dateTakenColumn = c.getColumnIndex(MediaStore.Video.Media.DATE_TAKEN)
+                while (c.moveToNext()) {
 
-            while (c.moveToNext()) {
+                    val id = c.getLong(idColumn)
+                    val width = c.getLong(widthColumn)
+                    val height = c.getLong(heightColumn)
+                    val dateTaken = c.getLong(dateTakenColumn)
 
-              val id = c.getLong(idColumn)
-              val width = c.getLong(widthColumn)
-              val height = c.getLong(heightColumn)
-              val dateTaken = c.getLong(dateTakenColumn)
+                    medias.add(mapOf(
+                            "id" to id.toString(),
+                            "mediaType" to "video",
+                            "mediaSubtypes" to listOf<String>(),
+                            "isFavorite" to false,
+                            "width" to width,
+                            "height" to height,
+                            "creationDate" to dateTaken))
 
-              medias.add(mapOf(
-                      "id" to id.toString(),
-                      "mediaType" to "video",
-                      "mediaSubtypes" to listOf<String>(),
-                      "isFavorite" to false,
-                      "width" to width,
-                      "height" to height,
-                      "creationDate" to dateTaken))
-
+                }
             }
-            c.close()
-          }
+            }
         }
-    }
 
     return mapOf(
             "start" to offset,
@@ -419,45 +456,83 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
     return byteArray
   }
 
-  private fun getCollectionThumbnail(collectionId: String): ByteArray? {
-    this.context.let { context ->
-      if (context is Context) {
-        val imageProjection = arrayOf(MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.BUCKET_ID)
-        val imageCursor = context.contentResolver.query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                imageProjection,
-                if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
-                null,
-                MediaStore.Images.Media.DATE_TAKEN + " DESC LIMIT 1")
-        if (imageCursor != null) {
-          if (imageCursor.moveToNext()) {
-            val idColumn = imageCursor.getColumnIndex(MediaStore.Images.Media._ID)
-            val id = imageCursor.getLong(idColumn)
-            return getImageThumbnail(id.toString())
-          }
-        }
+    private fun getCollectionThumbnail(collectionId: String): ByteArray? {
+        var selection = if (collectionId == "__ALL__") null else "bucket_id = $collectionId";
+        this.context.let { context ->
+            if (context is Context) {
+                val imageProjection = arrayOf(MediaStore.Images.Media._ID,
+                        MediaStore.Images.Media.BUCKET_ID)
 
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    context.contentResolver.query(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            imageProjection,
+                            Bundle().apply {
+                                putInt(ContentResolver.QUERY_ARG_LIMIT, 1)
+                                putString(
+                                        ContentResolver.QUERY_ARG_SORT_COLUMNS,
+                                        MediaStore.Images.Media.DATE_TAKEN
+                                )
+                                putInt(
+                                        ContentResolver.QUERY_ARG_SORT_DIRECTION,
+                                        ContentResolver.QUERY_SORT_DIRECTION_DESCENDING
+                                )
+                                putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection)
+                            },
+                            null)
+                } else {
+                    context.contentResolver.query(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            imageProjection,
+                            selection,
+                            null,
+                            MediaStore.Images.Media.DATE_TAKEN + " DESC LIMIT 1")
+                }?.use { imageCursor ->
+                    if (imageCursor.moveToNext()) {
+                        val idColumn = imageCursor.getColumnIndex(MediaStore.Images.Media._ID)
+                        val id = imageCursor.getLong(idColumn)
+                        return getImageThumbnail(id.toString())
+                    }
+                }
 
-        val videoProjection = arrayOf(MediaStore.Video.Media._ID,
-                MediaStore.Video.Media.BUCKET_ID)
-        val videoCursor = context.contentResolver.query(
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                videoProjection,
-                if (collectionId == "__ALL__") null else "bucket_id = $collectionId",
-                null,
-                MediaStore.Video.Media.DATE_TAKEN + " DESC LIMIT 1")
-        if (videoCursor != null) {
-          if (videoCursor.moveToNext()) {
-            val idColumn = videoCursor.getColumnIndex(MediaStore.Images.Media._ID)
-            val id = videoCursor.getLong(idColumn)
-            return getVideoThumbnail(id.toString())
-          }
+                val videoProjection = arrayOf(MediaStore.Video.Media._ID,
+                        MediaStore.Video.Media.BUCKET_ID)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    context.contentResolver.query(
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                            videoProjection,
+                            Bundle().apply {
+                                putInt(ContentResolver.QUERY_ARG_LIMIT, 1)
+                                putString(
+                                        ContentResolver.QUERY_ARG_SORT_COLUMNS,
+                                        MediaStore.Images.Media.DATE_TAKEN
+                                )
+                                putInt(
+                                        ContentResolver.QUERY_ARG_SORT_DIRECTION,
+                                        ContentResolver.QUERY_SORT_DIRECTION_DESCENDING
+                                )
+                                putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection)
+                            },
+                            null)
+                } else {
+                    context.contentResolver.query(
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                            videoProjection,
+                            selection,
+                            null,
+                            MediaStore.Video.Media.DATE_TAKEN + " DESC LIMIT 1")
+                }?.use { videoCursor ->
+                    if (videoCursor.moveToNext()) {
+                        val idColumn = videoCursor.getColumnIndex(MediaStore.Images.Media._ID)
+                        val id = videoCursor.getLong(idColumn)
+                        return getVideoThumbnail(id.toString())
+                    }
+                }
+            }
         }
-      }
+        return null
     }
-      return null
-  }
 
   private fun getImageFile(mediaId: String): String? {
     this.context.let { context ->
