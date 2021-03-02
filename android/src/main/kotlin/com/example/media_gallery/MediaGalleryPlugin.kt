@@ -354,7 +354,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 context.contentResolver.query(
-                        MediaStore.Images.Video.EXTERNAL_CONTENT_URI,
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                         projection,
                         Bundle().apply {
                             putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
