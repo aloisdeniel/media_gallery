@@ -269,7 +269,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                   MediaStore.Images.Media.DATE_TAKEN,
                   MediaStore.Images.Media.ORIENTATION)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= 30) {
                 context.contentResolver.query(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                         projection,
@@ -352,7 +352,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                   MediaStore.Video.Media.WIDTH,
                   MediaStore.Video.Media.DATE_TAKEN)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= 30) {
                 context.contentResolver.query(
                         MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                         projection,
@@ -361,7 +361,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                             putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
                             putString(
                                     ContentResolver.QUERY_ARG_SORT_COLUMNS,
-                                    MediaStore.Images.Media.DATE_TAKEN
+                                    MediaStore.Video.Media.DATE_TAKEN
                             )
                             putInt(
                                     ContentResolver.QUERY_ARG_SORT_DIRECTION,
@@ -465,7 +465,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                 val imageProjection = arrayOf(MediaStore.Images.Media._ID,
                         MediaStore.Images.Media.BUCKET_ID)
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (Build.VERSION.SDK_INT >= 30) {
                     context.contentResolver.query(
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                             imageProjection,
@@ -500,7 +500,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                 val videoProjection = arrayOf(MediaStore.Video.Media._ID,
                         MediaStore.Video.Media.BUCKET_ID)
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (Build.VERSION.SDK_INT >= 30) {
                     context.contentResolver.query(
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                             videoProjection,
