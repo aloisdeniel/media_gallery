@@ -359,9 +359,9 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                         Bundle().apply {
                             putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
                             putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
-                            putString(
-                                    ContentResolver.QUERY_ARG_SORT_COLUMNS,
-                                    MediaStore.Video.Media.DATE_TAKEN
+                            putStringArray(
+                                ContentResolver.QUERY_ARG_SORT_COLUMNS,
+                                arrayOf(MediaStore.Video.Media.DATE_ADDED)
                             )
                             putInt(
                                     ContentResolver.QUERY_ARG_SORT_DIRECTION,
@@ -471,9 +471,9 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                             imageProjection,
                             Bundle().apply {
                                 putInt(ContentResolver.QUERY_ARG_LIMIT, 1)
-                                putString(
-                                        ContentResolver.QUERY_ARG_SORT_COLUMNS,
-                                        MediaStore.Images.Media.DATE_TAKEN
+                                putStringArray(
+                                    ContentResolver.QUERY_ARG_SORT_COLUMNS,
+                                    arrayOf(MediaStore.Images.Media.DATE_ADDED)
                                 )
                                 putInt(
                                         ContentResolver.QUERY_ARG_SORT_DIRECTION,
@@ -506,9 +506,9 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                             videoProjection,
                             Bundle().apply {
                                 putInt(ContentResolver.QUERY_ARG_LIMIT, 1)
-                                putString(
-                                        ContentResolver.QUERY_ARG_SORT_COLUMNS,
-                                        MediaStore.Images.Media.DATE_TAKEN
+                                putStringArray(
+                                    ContentResolver.QUERY_ARG_SORT_COLUMNS,
+                                    arrayOf(MediaStore.Video.Media.DATE_ADDED)
                                 )
                                 putInt(
                                         ContentResolver.QUERY_ARG_SORT_DIRECTION,
