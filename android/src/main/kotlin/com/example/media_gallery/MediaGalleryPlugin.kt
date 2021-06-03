@@ -276,9 +276,9 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                         Bundle().apply {
                             putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
                             putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
-                            putString(
+                            putStringArray(
                                     ContentResolver.QUERY_ARG_SORT_COLUMNS,
-                                    MediaStore.Images.Media.DATE_TAKEN
+                                    arrayOf(MediaStore.Images.Media.DATE_ADDED)
                             )
                             putInt(
                                     ContentResolver.QUERY_ARG_SORT_DIRECTION,
@@ -298,7 +298,7 @@ class MediaGalleryPlugin: FlutterPlugin, MethodCallHandler {
                 val idColumn = c.getColumnIndex(MediaStore.Images.Media._ID)
                 val heightColumn = c.getColumnIndex(MediaStore.Images.Media.HEIGHT)
                 val widthColumn = c.getColumnIndex(MediaStore.Images.Media.WIDTH)
-                val dateTakenColumn = c.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN)
+                val dateTakenColumn = c.getColumnIndex(MediaStore.Images.Media.DATE_ADDED)
 
                 while (c.moveToNext()) {
 
