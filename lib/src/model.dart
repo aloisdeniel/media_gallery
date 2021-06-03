@@ -26,9 +26,9 @@ class MediaCollection {
   /// Pagination can be controlled out of [skip] (defaults to `0`) and
   /// [take] (defaults to `<total>`).
   Future<MediaPage> getMedias({
-    MediaType mediaType,
-    int skip,
-    int take,
+    MediaType? mediaType,
+    int? skip,
+    int? take,
   }) {
     return MediaGallery._listMedias(
       collection: this,
@@ -41,9 +41,9 @@ class MediaCollection {
   /// Get thumbnail data for this collection.
   ///
   /// It will display the lastly taken media thumbnail.
-  Future<List<int>> getThumbnail({
-    int width,
-    int height,
+  Future<List<int>?> getThumbnail({
+    int? width,
+    int? height,
     bool highQuality = false,
   }) {
     return MediaGallery._getCollectionThumbnail(
@@ -127,8 +127,8 @@ class Media {
 
   /// Get a JPEG thumbnail's data for this media.
   Future<List<int>> getThumbnail({
-    int width,
-    int height,
+    int? width,
+    int? height,
     bool highQuality = false,
   }) {
     return MediaGallery._getMediaThumbnail(
@@ -141,7 +141,7 @@ class Media {
   }
 
   /// Get the original file.
-  Future<File> getFile() {
+  Future<File?> getFile() {
     return MediaGallery._getMediaFile(
       mediaId: id,
       mediaType: mediaType,
