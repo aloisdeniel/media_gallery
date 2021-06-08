@@ -81,7 +81,7 @@ class MediaGallery {
       'height': height,
       'highQuality': highQuality,
     });
-    return bytes;
+    return bytes ?? ([].cast<int>());
   }
 
   static Future<File> _getMediaFile({
