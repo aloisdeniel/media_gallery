@@ -183,7 +183,7 @@ public class SwiftMediaGalleryPlugin: NSObject, FlutterPlugin {
             let asset = fetchResult.object(at: index) as PHAsset
             items.append([
                 "id": asset.localIdentifier,
-                "mediaType": toDartMediaType(value: asset.mediaType),
+                "mediaType": toDartMediaType(value: asset.mediaType) as Any,
                 "mediaSubtypes" : [],
                 "isFavorite": asset.isFavorite,
                 "width": asset.pixelWidth,

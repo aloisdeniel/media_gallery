@@ -1,7 +1,9 @@
 library media_gallery;
 
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +22,7 @@ class MediaGallery {
   /// List all available media gallery collections and counts number of
   /// items of [mediaTypes].
   static Future<List<dynamic>> listMediaCollections({
-    @required List<MediaType> mediaTypes,
+    required List<MediaType> mediaTypes,
   }) async {
     assert(mediaTypes != null);
     final json = await _channel.invokeMethod('listMediaCollections', {
@@ -32,10 +34,10 @@ class MediaGallery {
   }
 
   static Future<MediaPage> _listMedias({
-    @required MediaCollection collection,
-    MediaType mediaType,
-    int skip,
-    int take,
+    required MediaCollection collection,
+    MediaType? mediaType,
+    int? skip,
+    int? take,
   }) async {
     assert(collection.id != null);
     mediaType ??= MediaType.image;
@@ -49,11 +51,11 @@ class MediaGallery {
   }
 
   static Future<List<int>> _getMediaThumbnail({
-    @required String mediaId,
-    MediaType mediaType,
-    int width,
-    int height,
-    bool highQuality,
+    required String mediaId,
+    MediaType? mediaType,
+    int? width,
+    int? height,
+    bool? highQuality,
   }) async {
     assert(mediaId != null);
     final bytes = await _channel.invokeMethod('getMediaThumbnail', {
@@ -67,10 +69,10 @@ class MediaGallery {
   }
 
   static Future<List<int>> _getCollectionThumbnail({
-    @required String collectionId,
-    int width,
-    int height,
-    bool highQuality,
+    required String collectionId,
+    int? width,
+    int? height,
+    bool? highQuality,
   }) async {
     assert(collectionId != null);
     final bytes = await _channel.invokeMethod('getCollectionThumbnail', {
@@ -79,15 +81,15 @@ class MediaGallery {
       'height': height,
       'highQuality': highQuality,
     });
-    return bytes;
+    return bytes ?? ([].cast<int>());
   }
 
   static Future<File> _getMediaFile({
-    @required String mediaId,
-    MediaType mediaType,
-    int width,
-    int height,
-    bool highQuality,
+    required String mediaId,
+    MediaType? mediaType,
+    int? width,
+    int? height,
+    bool? highQuality,
   }) async {
     assert(mediaId != null);
     mediaType ??= MediaType.image;
